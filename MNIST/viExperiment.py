@@ -65,7 +65,7 @@ def plot_weight_sparsity(model, title="Sparsité des poids"):
     plt.title(title)
     plt.xlabel("Valeur des poids")
     plt.ylabel("Fréquence")
-    plt.yscale('log') # Log scale pour voir les petites valeurs proches de zéro
+    plt.yscale('log') 
     plt.grid(True, which="both", ls="-", alpha=0.2)
 
 def fgsm_attack(image, epsilon, data_grad):
@@ -153,10 +153,8 @@ if __name__ == "__main__" :
     if args.savedir is not None :
         saveModels(models, args.savedir)
     
-    # --- Après l'entraînement, ajoute l'analyse de sparsité ---
     plot_weight_sparsity(models[0], title=f"Sparsité - Prior: {args.prior}")
 
-    # --- Test d'Attaque Adversaire (Innovation) ---
     print("\nTesting Robustness (FGSM Attack):")
     epsilon = 0.2
     model = models[0]
