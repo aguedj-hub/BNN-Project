@@ -14,19 +14,19 @@ It was also enhanced with the assistance of AI based coding tools.
 
 While based on the tutorial's foundation, this repository introduces several significant modifications and diagnostic tools to explore Bayesian uncertainty and model architecture:
 
-    Laplace Prior Option: In addition to the standard Gaussian prior, I added the ability to use a Laplace Prior. This encourages weight sparsity, which can be visualized through the weight distribution plots.
+Laplace Prior Option: In addition to the standard Gaussian prior, I added the ability to use a Laplace Prior. This encourages weight sparsity, which can be visualized through the weight distribution plots.
 
-    Integrated MC-Dropout: I implemented and tested Monte-Carlo (MC) Dropout as an additional source of stochasticity, allowing for more robust uncertainty estimation during inference.
+Integrated MC-Dropout: I implemented and tested Monte-Carlo (MC) Dropout as an additional source of stochasticity, allowing for more robust uncertainty estimation during inference.
 
-    Ensemble Predictions: The script supports training multiple networks. I added visualizations to plot the mean predicted probabilities for each individual network in the ensemble, showing how different models "disagree" on difficult samples.
+Ensemble Predictions: The script supports training multiple networks. I added visualizations to plot the mean predicted probabilities for each individual network in the ensemble, showing how different models "disagree" on difficult samples.
 
-    Advanced Uncertainty Metrics: I integrated Entropy calculation to quantify the "doubt" of the model, particularly when facing unseen classes or pure noise.
+Advanced Uncertainty Metrics: I integrated Entropy calculation to quantify the "doubt" of the model, particularly when facing unseen classes or pure noise.
 
-    Calibration Analysis: I added Calibration Plots (Reliability Diagrams) for each test case to evaluate if the model's confidence scores actually match its real-world accuracy.
+Calibration Analysis: I added Calibration Plots (Reliability Diagrams) for each test case to evaluate if the model's confidence scores actually match its real-world accuracy.
 
-    Weight Sparsity Visualization: A new feature that plots the histogram of weight distributions (log-scale) to observe the effects of the chosen prior (Gaussian vs. Laplace).
+Weight Sparsity Visualization: A new feature that plots the histogram of weight distributions (log-scale) to observe the effects of the chosen prior (Gaussian vs. Laplace).
 
-    Adversarial Robustness (FGSM): Added an implementation of the Fast Gradient Sign Method (FGSM) to test how Bayesian uncertainty reacts to adversarial attacks.
+Adversarial Robustness (FGSM): Added an implementation of the Fast Gradient Sign Method (FGSM) to test how Bayesian uncertainty reacts to adversarial attacks.
 
 # Project Structure
 
@@ -40,13 +40,13 @@ While based on the tutorial's foundation, this repository introduces several sig
 
 The code generates several plots to provide a "look under the hood" of the BNN:
 
-    Calibration Plot: Compares predicted confidence vs. observed accuracy.
+Calibration Plot: Compares predicted confidence vs. observed accuracy.
 
-    Uncertainty Decomposition: Bar charts separating Aleatoric uncertainty (within-sample variance) and Epistemic uncertainty (across-sample/ensemble variance).
+Uncertainty Decomposition: Bar charts separating Aleatoric uncertainty (within-sample variance) and Epistemic uncertainty (across-sample/ensemble variance).
 
-    Entropy Analysis: Printed values showing the average information entropy for seen classes, unseen classes, and white noise.
+Entropy Analysis: Printed values showing the average information entropy for seen classes, unseen classes, and white noise.
 
-    Weight Distribution: A histogram showing how the weights are centered and spread, specifically demonstrating the "peaky" nature of the Laplace prior.
+Weight Distribution: A histogram showing how the weights are centered and spread, specifically demonstrating the "peaky" nature of the Laplace prior.
 
 # How to Run
 Installation
@@ -57,11 +57,11 @@ Training with a Laplace Prior
 To train a model using the Laplace prior and reserving class '5' as the unseen class:
 Bash
 
-python viExperiment.py --prior laplace --filteredclass 5 --nepochs 10 --numnetworks 5
+    python viExperiment.py --prior laplace --filteredclass 5 --nepochs 10 --numnetworks 5
 
 Loading and Testing
 
 To skip training and run evaluations on a previously saved model:
 Bash
 
-python viExperiment.py --notrain --savedir ./models --nruntests 100
+    python viExperiment.py --notrain --savedir ./models --nruntests 100
