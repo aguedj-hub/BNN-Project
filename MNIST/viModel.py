@@ -4,6 +4,16 @@
 Created on Mon May 17 13:05:55 2021
 
 @author: laurent
+@ARTICLE{9756596,
+author={Jospin, Laurent Valentin and Laga, Hamid and Boussaid, Farid and Buntine, Wray and Bennamoun, Mohammed},
+journal={IEEE Computational Intelligence Magazine}, 
+title={Hands-On Bayesian Neural Networks—A Tutorial for Deep Learning Users}, 
+year={2022},
+volume={17},
+number={2},
+pages={29-48},
+doi={10.1109/MCI.2022.3155327}
+}
 """
 
 import numpy as np
@@ -63,7 +73,7 @@ class MeanFieldGaussianFeedForward(VIModule) :
 			  biasPriorSigma = 1.,
 			  initMeanZero = False,
 			  initBiasMeanZero = False,
-			  initPriorSigmaScale = 0.01) :
+			  prior_type='gaussian', initPriorSigmaScale = 0.01) :
 		
 		
 		super(MeanFieldGaussianFeedForward, self).__init__()
@@ -78,9 +88,12 @@ class MeanFieldGaussianFeedForward(VIModule) :
 		self.lweights_sigma = Parameter(torch.log(initPriorSigmaScale*weightPriorSigma*torch.ones(out_features, int(in_features/groups))))
 			
 		self.noiseSourceWeights = Normal(torch.zeros(out_features, int(in_features/groups)), 
-								   torch.ones(out_features, int(in_features/groups)))
+							   torch.ones(out_features, int(in_features/groups)))
 		
-		self.addLoss(lambda s : 0.5*s.getSampledWeights().pow(2).sum()/weightPriorSigma**2)
+		if prior_type == "gaussian" :
+			self.addLoss(lambda s : 0.5*s.getSampledWeights().pow(2).sum()/weightPriorSigma**2)
+		else :
+			self.addLoss(lambda s : s.getSampledWeights().abs().sum() / weightPriorSigma)
 		self.addLoss(lambda s : -self.out_features/2*np.log(2*np.pi) - 0.5*s.samples['wNoiseState'].pow(2).sum() - s.lweights_sigma.sum())
 		
 		if self.has_bias :
@@ -89,7 +102,10 @@ class MeanFieldGaussianFeedForward(VIModule) :
 			
 			self.noiseSourceBias = Normal(torch.zeros(out_features), torch.ones(out_features))
 			
-			self.addLoss(lambda s : 0.5*s.getSampledBias().pow(2).sum()/biasPriorSigma**2)
+			if prior_type == "gaussian" :
+				self.addLoss(lambda s : 0.5*s.getSampledBias().pow(2).sum()/biasPriorSigma**2)
+			else :
+				self.addLoss(lambda s : s.getSampledBias().abs().sum() / weightPriorSigma)
 			self.addLoss(lambda s : -self.out_features/2*np.log(2*np.pi) - 0.5*s.samples['bNoiseState'].pow(2).sum() - self.lbias_sigma.sum())
 			
 			
@@ -132,7 +148,8 @@ class MeanFieldGaussian2DConvolution(VIModule) :
 			  wPriorSigma = 1., 
 			  bPriorSigma = 1.,
 			  initMeanZero = False,
-			  initBiasMeanZero = False,
+			  initBiasMeanZero = False, 
+			  prior_type = "gaussian",
 			  initPriorSigmaScale = 0.01) :
 		
 		super(MeanFieldGaussian2DConvolution, self).__init__()
@@ -154,9 +171,12 @@ class MeanFieldGaussian2DConvolution(VIModule) :
 		self.lweights_sigma = Parameter(torch.log(initPriorSigmaScale*wPriorSigma*torch.ones(out_channels, int(in_channels/groups), self.kernel_size[0], self.kernel_size[1])))
 			
 		self.noiseSourceWeights = Normal(torch.zeros(out_channels, int(in_channels/groups), self.kernel_size[0], self.kernel_size[1]), 
-								   torch.ones(out_channels, int(in_channels/groups), self.kernel_size[0], self.kernel_size[1]))
+							   torch.ones(out_channels, int(in_channels/groups), self.kernel_size[0], self.kernel_size[1]))
 		
-		self.addLoss(lambda s : 0.5*s.getSampledWeights().pow(2).sum()/wPriorSigma**2)
+		if prior_type == "gaussian" :
+			self.addLoss(lambda s : 0.5*s.getSampledWeights().pow(2).sum()/wPriorSigma**2)
+		else :
+			self.addLoss(lambda s : s.getSampledWeights().abs().sum() / wPriorSigma)
 		self.addLoss(lambda s : -self.out_channels/2*np.log(2*np.pi) - 0.5*s.samples['wNoiseState'].pow(2).sum() - s.lweights_sigma.sum())
 		
 		
@@ -166,7 +186,10 @@ class MeanFieldGaussian2DConvolution(VIModule) :
 			
 			self.noiseSourceBias = Normal(torch.zeros(out_channels), torch.ones(out_channels))
 			
-			self.addLoss(lambda s : 0.5*s.getSampledBias().pow(2).sum()/bPriorSigma**2)
+			if prior_type == "gaussian" :
+				self.addLoss(lambda s : 0.5*s.getSampledBias().pow(2).sum()/bPriorSigma**2)
+			else :
+				self.addLoss(lambda s : s.getSampledBias().abs().sum() / bPriorSigma)
 			self.addLoss(lambda s : -self.out_channels/2*np.log(2*np.pi) - 0.5*s.samples['bNoiseState'].pow(2).sum() - self.lbias_sigma.sum())
 			
 			
@@ -208,6 +231,7 @@ class BayesianMnistNet(VIModule):
 				 convBPriorSigma = 5., 
 				 linearWPriorSigma = 1., 
 				 linearBPriorSigma = 5., 
+         prior_type = "gaussian",
 				 p_mc_dropout = 0.5) :
 		
 		super().__init__()
@@ -217,21 +241,23 @@ class BayesianMnistNet(VIModule):
 		self.conv1 = MeanFieldGaussian2DConvolution(1, 16, 
 													wPriorSigma = convWPriorSigma, 
 													bPriorSigma = convBPriorSigma, 
-													kernel_size=5,
-													initPriorSigmaScale=1e-7)
+													kernel_size=5, prior_type = prior_type, 
+													initPriorSigmaScale=0.01)
 		self.conv2 = MeanFieldGaussian2DConvolution(16, 32, 
 													wPriorSigma = convWPriorSigma, 
 													bPriorSigma = convBPriorSigma, 
-													kernel_size=5,
-													initPriorSigmaScale=1e-7)
+													kernel_size=5, prior_type = prior_type, 
+													initPriorSigmaScale=0.01)
 		self.linear1 = MeanFieldGaussianFeedForward(512, 128,
 													weightPriorSigma = linearWPriorSigma, 
 													biasPriorSigma = linearBPriorSigma,
-													initPriorSigmaScale=1e-7)
+                          prior_type = prior_type, 
+													initPriorSigmaScale=0.01)
 		self.linear2 = MeanFieldGaussianFeedForward(128, 10,
 													weightPriorSigma = linearWPriorSigma, 
 													biasPriorSigma = linearBPriorSigma,
-													initPriorSigmaScale=1e-7)
+                          prior_type = prior_type, 
+													initPriorSigmaScale=0.01)
 
 	def forward(self, x, stochastic=True):
 		

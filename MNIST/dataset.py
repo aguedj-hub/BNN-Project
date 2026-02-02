@@ -4,6 +4,16 @@
 Created on Mon May 17 11:05:05 2021
 
 @author: laurent
+@ARTICLE{9756596,
+author={Jospin, Laurent Valentin and Laga, Hamid and Boussaid, Farid and Buntine, Wray and Bennamoun, Mohammed},
+journal={IEEE Computational Intelligence Magazine}, 
+title={Hands-On Bayesian Neural Networks—A Tutorial for Deep Learning Users}, 
+year={2022},
+volume={17},
+number={2},
+pages={29-48},
+doi={10.1109/MCI.2022.3155327}
+}
 """
 
 import torch
